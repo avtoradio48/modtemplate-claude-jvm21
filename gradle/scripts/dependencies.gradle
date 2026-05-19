@@ -4,23 +4,19 @@ repositories {
     // Other repositories described by default:
     // CleanroomMC: https://maven.cleanroommc.com
     maven {
-        name = 'CurseMaven'
-        url = 'https://cursemaven.com'
+        name 'CurseMaven'
+        url 'https://curse.cleanroommc.com'
     }
     maven {
-        name = 'CleanroomCurseMaven'
-        url = 'https://curse.cleanroommc.com'
-    }
-    maven {
-        name = 'Modrinth'
-        url = 'https://api.modrinth.com/maven'
+        name 'Modrinth'
+        url 'https://api.modrinth.com/maven'
     }
     mavenCentral()
     mavenLocal() // Must be last for caching to work
 }
 
 dependencies {
-    compileOnly "com.cleanroommc:sponge-mixin:0.20.13+mixin.0.8.7"
+    compileOnly "com.cleanroommc:sponge-mixin:0.20.12+mixin.0.8.7"
     if (propertyBool('enable_lwjglx')) {
         compileOnly "com.cleanroommc:lwjglx:1.0.0"
     }
