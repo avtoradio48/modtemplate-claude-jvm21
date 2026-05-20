@@ -1,0 +1,8 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "top":    "arboriculturemill:blocks/arboriculture_mill_top",
+    "front":  "arboriculturemill:blocks/arboriculture_mill_front",
+    "side":   "arboriculturemill:blocks/arboriculture_mill_side"
+  }
+}

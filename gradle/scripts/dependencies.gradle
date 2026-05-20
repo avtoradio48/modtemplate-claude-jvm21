@@ -3,9 +3,21 @@ apply from: 'gradle/scripts/helpers.gradle'
 repositories {
     // Other repositories described by default:
     // CleanroomMC: https://maven.cleanroommc.com
+
+    // CurseMaven — official endpoint first, Cleanroom mirror as fallback.
+    // IMPORTANT: some mods (Gendustry, Binnie's Mods, ...) have third-party
+    // API distribution DISABLED on CurseForge, so they cannot be resolved
+    // from any CurseMaven endpoint regardless of file ID (you get HTTP 404).
+    // Those must be supplied as local jars — see the dependencies block.
     maven {
-        name 'CurseMaven'
+        name 'CurseMavenOfficial'
+        url 'https://cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    maven {
+        name 'CurseMavenMirror'
         url 'https://curse.cleanroommc.com'
+        content { includeGroup 'curse.maven' }
     }
     maven {
         name 'Modrinth'
@@ -21,33 +33,38 @@ dependencies {
         compileOnly "com.cleanroommc:lwjglx:1.0.0"
     }
 
-    // Example - Dependency descriptor:
-    // 'com.google.code.gson:gson:2.8.6' << group: com.google.code.gson, name:gson, version:2.8.6
-    // 'group:name:version:classifier' where classifier is optional
+    // ------------------------------------------------------------------------
+    // Mod dependencies for Arboriculture Mill.
+    //
+    // Forestry / Gendustry / Binnie's Mods are pulled from the local `libs/`
+    // folder. This is the only reliable option: Gendustry and Binnie's Mods
+    // have third-party API distribution disabled on CurseForge, so CurseMaven
+    // returns HTTP 404 for them no matter which file ID is used.
+    //
+    // SETUP: drop these exact jars into `<project root>/libs/`:
+    //   libs/forestry_1.12.2-5.8.2.422.jar
+    //   libs/gendustry-1.6.5.8-mc1.12.2.jar
+    //   libs/binnie-mods-1.12.2-2.5.1.203.jar
+    //
+    // Any *.jar placed in `libs/` is treated as a (remapped) mod dependency.
+    // Unimined remaps these from production (SRG) names to the dev mappings
+    // via the `mods { remap(...) }` block in build.gradle.
+    //
+    // Only Forestry is needed at COMPILE time (the mod imports forestry.api.*).
+    // Gendustry and Binnie are runtime-only — their trees register through
+    // Forestry's ITreeRoot, so the mill processes them without a direct
+    // compile dependency. They sit on the compile classpath here purely for
+    // convenience; the mod still loads if they are absent at runtime.
+    //
+    // Forestry alone CAN also be resolved from CurseMaven if you prefer not
+    // to keep its jar locally — uncomment the two lines at the bottom and
+    // remove forestry's jar from `libs/`.
+    // ------------------------------------------------------------------------
 
-    // Example - CurseMaven dependencies:
-    // 'curse.maven:had-enough-items-557549:4543375' << had-enough-items = project slug, 557549 = project id, 4543375 = file id
-    // Full documentation: https://cursemaven.com/
+    modCompileOnly fileTree(dir: "${rootProject.projectDir}/libs", include: ['*.jar'])
+    modRuntimeOnly fileTree(dir: "${rootProject.projectDir}/libs", include: ['*.jar'])
 
-    // Example - Modrinth dependencies:
-    // 'maven.modrinth:jei:4.16.1.1000' << jei = project name, 4.16.1.1000 = file version
-    // Full documentation: https://docs.modrinth.com/docs/tutorials/maven/
-
-    // Common dependency types (configuration):
-    // implementation = dependency available at both compile time and runtime
-    // runtimeOnly = runtime dependency
-    // compileOnly = compile time dependency
-    // annotationProcessor = annotation processing dependencies
-    // contain = bundle dependency jars into final artifact, will extract them in mod loading. Can be used it as jar-in-jar
-    // shadow = bundle dependencies into shadow output artifact (relocation configurable in shadowJar task)
-    // modImplementation = mod dependency available at both compile time and runtime
-    // modCompileOnly = mod dependency available only at compile time
-
-    // Transitive dependencies:
-    // (Dependencies that your dependency depends on)
-    // If you wish to exclude transitive dependencies in the described dependencies
-    // Use a closure as such:
-    // implementation ('com.google.code.gson:gson:2.8.6') {
-    //     transitive = false
-    // }
+    // Optional: Forestry from CurseMaven instead of libs/ (verified working).
+    // modCompileOnly 'curse.maven:forestry-59751:2918418'
+    // modRuntimeOnly 'curse.maven:forestry-59751:2918418'
 }
