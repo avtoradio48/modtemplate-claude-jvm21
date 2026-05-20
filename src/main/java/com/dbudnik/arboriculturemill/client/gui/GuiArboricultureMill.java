@@ -36,17 +36,19 @@ public class GuiArboricultureMill extends GuiContainer {
     private static final int PROGRESS_FILL      = 0xFFFFFFFF;
     private static final int PROGRESS_FILL_2    = 0xFFCCCCCC;
 
+    // The two vertical bars sit side-by-side at the far left, then the input
+    // slots, the progress arrow, and the output grid run left-to-right.
     private static final int ENERGY_X      = 8;
     private static final int ENERGY_Y      = 18;
     private static final int ENERGY_WIDTH  = 14;
     private static final int ENERGY_HEIGHT = 70;
 
-    private static final int WATER_X      = 78;
+    private static final int WATER_X      = 26;
     private static final int WATER_Y      = 18;
     private static final int WATER_WIDTH  = 14;
     private static final int WATER_HEIGHT = 70;
 
-    private static final int ARROW_X      = 96;
+    private static final int ARROW_X      = 84;
     private static final int ARROW_Y      = 40;
     private static final int ARROW_WIDTH  = 18;
     private static final int ARROW_HEIGHT = 12;
