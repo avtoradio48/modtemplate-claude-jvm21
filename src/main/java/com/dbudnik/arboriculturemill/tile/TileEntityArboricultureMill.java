@@ -161,8 +161,10 @@ public class TileEntityArboricultureMill extends TileEntity implements ITickable
 
         if (!hasRoomFor(projected)) return;
 
-        // All conditions met — consume inputs and commit to the operation.
-        inventory.extractItem(SLOT_SAPLING, 1, false);
+        // All conditions met — commit to the operation.
+        // The sapling is a PERSISTENT TEMPLATE: it is never consumed and
+        // cannot be pulled out by pipes (see ExternalItemHandler). Only the
+        // fertilizer and water are spent per operation.
         inventory.extractItem(SLOT_FERTILIZER, FERTILIZER_PER_OPERATION, false);
         water.consumeInternal(WATER_PER_OPERATION);
 
