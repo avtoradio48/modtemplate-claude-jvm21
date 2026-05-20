@@ -1,0 +1,25 @@
+Local mod dependencies for Arboriculture Mill
+=============================================
+
+Place the following mod jars in THIS folder, then refresh Gradle:
+
+    forestry_1.12.2-5.8.2.422.jar      (required at compile + runtime)
+    gendustry-1.6.5.8-mc1.12.2.jar     (runtime only — optional)
+    binnie-mods-1.12.2-2.5.1.203.jar   (runtime only — optional)
+
+Why local jars instead of CurseMaven?
+--------------------------------------
+Gendustry and Binnie's Mods have "third-party API distribution" disabled
+on CurseForge. Because of that, CurseMaven (both the official endpoint and
+the Cleanroom mirror) returns HTTP 404 for them no matter which file ID is
+used — they simply cannot be resolved remotely.
+
+Forestry CAN be resolved from CurseMaven; if you would rather not keep its
+jar here, see the commented-out lines in gradle/scripts/dependencies.gradle.
+
+Notes
+-----
+* Any *.jar dropped in this folder is treated as a remapped mod dependency.
+* The jars themselves are git-ignored (see .gitignore) — only this file is
+  committed, so the folder stays in version control.
+* After adding/removing jars: IntelliJ -> Gradle panel -> Reload.

@@ -25,3 +25,7 @@ gradle-app.setting
 # IDEA config
 .idea
 
+# Local mod dependency jars — copyrighted, must not be committed.
+# The libs/ folder itself is kept via libs/PUT_MOD_JARS_HERE.txt
+libs/*.jar
+

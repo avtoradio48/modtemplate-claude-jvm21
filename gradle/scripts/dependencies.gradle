@@ -3,9 +3,21 @@ apply from: 'gradle/scripts/helpers.gradle'
 repositories {
     // Other repositories described by default:
     // CleanroomMC: https://maven.cleanroommc.com
+
+    // CurseMaven — official endpoint first, Cleanroom mirror as fallback.
+    // IMPORTANT: some mods (Gendustry, Binnie's Mods, ...) have third-party
+    // API distribution DISABLED on CurseForge, so they cannot be resolved
+    // from any CurseMaven endpoint regardless of file ID (you get HTTP 404).
+    // Those must be supplied as local jars — see the dependencies block.
     maven {
-        name 'CurseMaven'
+        name 'CurseMavenOfficial'
+        url 'https://cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    maven {
+        name 'CurseMavenMirror'
         url 'https://curse.cleanroommc.com'
+        content { includeGroup 'curse.maven' }
     }
     maven {
         name 'Modrinth'
@@ -24,26 +36,35 @@ dependencies {
     // ------------------------------------------------------------------------
     // Mod dependencies for Arboriculture Mill.
     //
-    // The CurseMaven IDs below correspond to the file versions requested:
-    //   forestry_1.12.2-5.8.2.422
-    //   gendustry-1.6.5.8-mc1.12.2
-    //   binnie-mods-1.12.2-2.5.1.203
+    // Forestry / Gendustry / Binnie's Mods are pulled from the local `libs/`
+    // folder. This is the only reliable option: Gendustry and Binnie's Mods
+    // have third-party API distribution disabled on CurseForge, so CurseMaven
+    // returns HTTP 404 for them no matter which file ID is used.
     //
-    // Project slugs / IDs are taken from CurseForge URLs:
-    //   forestry            (59751)
-    //   gendustry           (220444)
-    //   binnies-mods        (227482)
+    // SETUP: drop these exact jars into `<project root>/libs/`:
+    //   libs/forestry_1.12.2-5.8.2.422.jar
+    //   libs/gendustry-1.6.5.8-mc1.12.2.jar
+    //   libs/binnie-mods-1.12.2-2.5.1.203.jar
     //
-    // File IDs may need to be adjusted if a specific build cannot be
-    // resolved by CurseMaven (CurseForge sometimes hides "alpha" file IDs).
+    // Any *.jar placed in `libs/` is treated as a (remapped) mod dependency.
+    // Unimined remaps these from production (SRG) names to the dev mappings
+    // via the `mods { remap(...) }` block in build.gradle.
+    //
+    // Only Forestry is needed at COMPILE time (the mod imports forestry.api.*).
+    // Gendustry and Binnie are runtime-only — their trees register through
+    // Forestry's ITreeRoot, so the mill processes them without a direct
+    // compile dependency. They sit on the compile classpath here purely for
+    // convenience; the mod still loads if they are absent at runtime.
+    //
+    // Forestry alone CAN also be resolved from CurseMaven if you prefer not
+    // to keep its jar locally — uncomment the two lines at the bottom and
+    // remove forestry's jar from `libs/`.
     // ------------------------------------------------------------------------
 
-    modCompileOnly 'curse.maven:forestry-59751:2918418'
-    modRuntimeOnly 'curse.maven:forestry-59751:2918418'
+    modCompileOnly fileTree(dir: "${rootProject.projectDir}/libs", include: ['*.jar'])
+    modRuntimeOnly fileTree(dir: "${rootProject.projectDir}/libs", include: ['*.jar'])
 
-    modCompileOnly 'curse.maven:gendustry-220444:2487737'
-    modRuntimeOnly 'curse.maven:gendustry-220444:2487737'
-
-    modCompileOnly 'curse.maven:binnies-mods-227482:2920578'
-    modRuntimeOnly 'curse.maven:binnies-mods-227482:2920578'
+    // Optional: Forestry from CurseMaven instead of libs/ (verified working).
+    // modCompileOnly 'curse.maven:forestry-59751:2918418'
+    // modRuntimeOnly 'curse.maven:forestry-59751:2918418'
 }
