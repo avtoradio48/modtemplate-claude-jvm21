@@ -1,10 +1,13 @@
 package com.dbudnik.arboriculturemill.client.gui;
 
+import com.dbudnik.arboriculturemill.Reference;
 import com.dbudnik.arboriculturemill.inventory.ContainerArboricultureMill;
 import com.dbudnik.arboriculturemill.tile.TileEntityArboricultureMill;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -12,32 +15,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * IC2-style mill GUI. The whole panel is painted programmatically with
- * {@link Gui#drawRect} using the exact same coordinates as the container
- * slots, so the slot frames always line up. (A custom background texture was
- * dropped on purpose: a PNG that is not 256x256 is sampled by
- * {@code drawTexturedModalRect} as if it were, which stretched the panel and
- * made the layout look "shifted".)
+ * IC2-style mill GUI.
+ *
+ * The static panel — background, slot frames, and the empty energy / water /
+ * progress frames — comes from a 256x256 background texture (the GUI itself
+ * occupies the top-left 176x184). The dynamic fills (energy gradient, water
+ * level, progress arrow) are painted on top with {@link Gui#drawRect}, since
+ * they depend on the tile entity's live state.
  */
 public class GuiArboricultureMill extends GuiContainer {
 
-    private static final int PANEL_COLOR        = 0xFFC6C6C6; // IC2 light grey
-    private static final int PANEL_SHADOW       = 0xFF555555;
-    private static final int PANEL_HIGHLIGHT    = 0xFFFFFFFF;
-    private static final int SLOT_BG            = 0xFF8B8B8B;
-    private static final int SLOT_SHADOW        = 0xFF373737;
-    private static final int ENERGY_FRAME       = 0xFF1F1F1F;
-    private static final int ENERGY_BG          = 0xFF202020;
-    private static final int ENERGY_FILL_TOP    = 0xFFC42323;
-    private static final int ENERGY_FILL_BOT    = 0xFFFFD800;
-    private static final int WATER_FILL         = 0xFF2266DD;
-    private static final int WATER_BG           = 0xFF1A2A38;
-    private static final int PROGRESS_BG        = 0xFF373737;
-    private static final int PROGRESS_FILL      = 0xFFFFFFFF;
-    private static final int PROGRESS_FILL_2    = 0xFFCCCCCC;
+    private static final ResourceLocation BACKGROUND =
+            new ResourceLocation(Reference.MOD_ID, "textures/gui/arboriculture_mill.png");
 
-    // The two vertical bars sit side-by-side at the far left, then the input
-    // slots, the progress arrow, and the output grid run left-to-right.
+    // Dynamic-fill colours — the frames/backgrounds themselves live in the texture.
+    private static final int ENERGY_FILL_TOP = 0xFFC42323;
+    private static final int ENERGY_FILL_BOT = 0xFFFFD800;
+    private static final int WATER_FILL      = 0xFF2266DD;
+    private static final int PROGRESS_FILL   = 0xFFFFFFFF;
+    private static final int PROGRESS_FILL_2 = 0xFFCCCCCC;
+
+    // Gauge geometry — must match the frames baked into the texture.
     private static final int ENERGY_X      = 8;
     private static final int ENERGY_Y      = 18;
     private static final int ENERGY_WIDTH  = 14;
@@ -64,65 +62,26 @@ public class GuiArboricultureMill extends GuiContainer {
 
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        drawProgrammatic();
-        drawEnergyBar();
-        drawWaterBar();
-        drawProgressArrow();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        mc.getTextureManager().bindTexture(BACKGROUND);
+        // The texture is 256x256 with the panel in the top-left corner, so
+        // drawTexturedModalRect's fixed 1/256 UV scale maps it 1:1.
+        drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+
+        drawEnergyFill();
+        drawWaterFill();
+        drawProgressFill();
     }
 
-    private void drawProgrammatic() {
-        // Outer panel with bevel.
-        Gui.drawRect(guiLeft, guiTop, guiLeft + xSize, guiTop + ySize, PANEL_COLOR);
-        // Top + left highlight
-        Gui.drawRect(guiLeft, guiTop, guiLeft + xSize, guiTop + 1, PANEL_HIGHLIGHT);
-        Gui.drawRect(guiLeft, guiTop, guiLeft + 1, guiTop + ySize, PANEL_HIGHLIGHT);
-        // Bottom + right shadow
-        Gui.drawRect(guiLeft, guiTop + ySize - 1, guiLeft + xSize, guiTop + ySize, PANEL_SHADOW);
-        Gui.drawRect(guiLeft + xSize - 1, guiTop, guiLeft + xSize, guiTop + ySize, PANEL_SHADOW);
-
-        // Slot backgrounds.
-        drawSlotBackground(ContainerArboricultureMill.SAPLING_SLOT_X, ContainerArboricultureMill.SAPLING_SLOT_Y);
-        drawSlotBackground(ContainerArboricultureMill.FERTILIZER_SLOT_X, ContainerArboricultureMill.FERTILIZER_SLOT_Y);
-        for (int row = 0; row < ContainerArboricultureMill.OUTPUT_ROWS; row++) {
-            for (int col = 0; col < ContainerArboricultureMill.OUTPUT_COLS; col++) {
-                drawSlotBackground(
-                        ContainerArboricultureMill.OUTPUT_GRID_X + col * 18,
-                        ContainerArboricultureMill.OUTPUT_GRID_Y + row * 18);
-            }
-        }
-        // Player inventory.
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 9; col++) {
-                drawSlotBackground(
-                        ContainerArboricultureMill.PLAYER_INV_X + col * 18,
-                        ContainerArboricultureMill.PLAYER_INV_Y + row * 18);
-            }
-        }
-        for (int col = 0; col < 9; col++) {
-            drawSlotBackground(ContainerArboricultureMill.PLAYER_INV_X + col * 18,
-                    ContainerArboricultureMill.HOTBAR_Y);
-        }
-    }
-
-    private void drawSlotBackground(int x, int y) {
-        int sx = guiLeft + x - 1;
-        int sy = guiTop + y - 1;
-        Gui.drawRect(sx, sy, sx + 18, sy + 18, SLOT_SHADOW);
-        Gui.drawRect(sx + 1, sy + 1, sx + 17, sy + 17, SLOT_BG);
-    }
-
-    private void drawEnergyBar() {
-        int x = guiLeft + ENERGY_X;
-        int y = guiTop + ENERGY_Y;
-        Gui.drawRect(x - 1, y - 1, x + ENERGY_WIDTH + 1, y + ENERGY_HEIGHT + 1, ENERGY_FRAME);
-        Gui.drawRect(x, y, x + ENERGY_WIDTH, y + ENERGY_HEIGHT, ENERGY_BG);
-
+    private void drawEnergyFill() {
         int stored = tile.getEnergyStorage().getEnergyStored();
         int max = tile.getEnergyStorage().getMaxEnergyStored();
         if (max <= 0) return;
         int filled = (int) ((long) ENERGY_HEIGHT * stored / max);
         if (filled <= 0) return;
-        // Gradient fill, top = red, bottom = yellow (drawn bottom-up).
+        int x = guiLeft + ENERGY_X;
+        int y = guiTop + ENERGY_Y;
+        // Gradient fill, drawn bottom-up: yellow at the base, red at the top.
         for (int i = 0; i < filled; i++) {
             float t = (float) i / Math.max(1, ENERGY_HEIGHT - 1);
             int rowColor = blendColor(ENERGY_FILL_BOT, ENERGY_FILL_TOP, t);
@@ -131,37 +90,27 @@ public class GuiArboricultureMill extends GuiContainer {
         }
     }
 
-    private void drawWaterBar() {
-        int x = guiLeft + WATER_X;
-        int y = guiTop + WATER_Y;
-        Gui.drawRect(x - 1, y - 1, x + WATER_WIDTH + 1, y + WATER_HEIGHT + 1, ENERGY_FRAME);
-        Gui.drawRect(x, y, x + WATER_WIDTH, y + WATER_HEIGHT, WATER_BG);
-
+    private void drawWaterFill() {
         FluidStack stack = tile.getWaterTank().getFluid();
         int stored = stack == null ? 0 : stack.amount;
         int max = tile.getWaterTank().getCapacity();
         if (max <= 0) return;
         int filled = (int) ((long) WATER_HEIGHT * stored / max);
         if (filled <= 0) return;
+        int x = guiLeft + WATER_X;
+        int y = guiTop + WATER_Y;
         Gui.drawRect(x, y + WATER_HEIGHT - filled, x + WATER_WIDTH, y + WATER_HEIGHT, WATER_FILL);
     }
 
-    private void drawProgressArrow() {
-        int x = guiLeft + ARROW_X;
-        int y = guiTop + ARROW_Y;
-
-        // Frame.
-        Gui.drawRect(x - 1, y - 1, x + ARROW_WIDTH + 1, y + ARROW_HEIGHT + 1, ENERGY_FRAME);
-        Gui.drawRect(x, y, x + ARROW_WIDTH, y + ARROW_HEIGHT, PROGRESS_BG);
-
+    private void drawProgressFill() {
         int total = tile.getTotalTicks();
         int progress = tile.getProgress();
         if (total <= 0 || !tile.isProcessing()) return;
         int filled = (int) ((long) ARROW_WIDTH * (total - progress) / total);
         if (filled <= 0) return;
-        // Body
+        int x = guiLeft + ARROW_X;
+        int y = guiTop + ARROW_Y;
         Gui.drawRect(x, y + 2, x + filled, y + ARROW_HEIGHT - 2, PROGRESS_FILL);
-        // Tip — small triangle hint
         int tipX = Math.min(x + filled, x + ARROW_WIDTH - 2);
         Gui.drawRect(tipX, y + 1, tipX + 2, y + ARROW_HEIGHT - 1, PROGRESS_FILL_2);
     }
@@ -226,5 +175,4 @@ public class GuiArboricultureMill extends GuiContainer {
         int oB = (int) (aB + (bB - aB) * t);
         return (oA << 24) | (oR << 16) | (oG << 8) | oB;
     }
-
 }
