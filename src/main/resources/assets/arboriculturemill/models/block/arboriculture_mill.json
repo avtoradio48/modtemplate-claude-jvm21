@@ -1,6 +1,7 @@
 {
-  "parent": "block/cube_all",
+  "parent": "forestry:block/farm_parent",
   "textures": {
-    "all": "arboriculturemill:blocks/arboretum"
+    "particle": "arboriculturemill:blocks/arboretum_particle",
+    "farm": "arboriculturemill:blocks/arboretum"
   }
 }
