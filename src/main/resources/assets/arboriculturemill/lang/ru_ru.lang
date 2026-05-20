@@ -1,0 +1,5 @@
+itemGroup.arboriculturemill=Arboriculture Mill
+block.arboriculturemill.arboriculture_mill.name=Древообрабатывающая мельница
+
+tile.arboriculturemill.arboriculture_mill.tooltip.line1=Перерабатывает саженцы Forestry в древесину и плоды.
+tile.arboriculturemill.arboriculture_mill.tooltip.line2=Требует энергию, воду и удобрение.

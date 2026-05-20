@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ILI",
+    "PDP",
+    "IRI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "L": { "type": "forge:ore_dict", "ore": "logWood" },
+    "P": { "item": "minecraft:piston" },
+    "D": { "item": "minecraft:dispenser" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": {
+    "item": "arboriculturemill:arboriculture_mill"
+  }
+}
