@@ -35,6 +35,9 @@ public class GuiArboricultureMill extends GuiContainer {
     private static final int PROGRESS_FILL   = 0xFFFFFFFF;
     private static final int PROGRESS_FILL_2 = 0xFFCCCCCC;
 
+    // Light shade painted over the game world behind the panel.
+    private static final int DIM_COLOR       = 0x66000000;
+
     // Gauge geometry — must match the frames baked into the texture.
     private static final int ENERGY_X      = 8;
     private static final int ENERGY_Y      = 18;
@@ -58,6 +61,14 @@ public class GuiArboricultureMill extends GuiContainer {
         this.tile = tile;
         this.xSize = ContainerArboricultureMill.GUI_WIDTH;
         this.ySize = ContainerArboricultureMill.GUI_HEIGHT;
+    }
+
+    @Override
+    public void drawDefaultBackground() {
+        // GuiContainer#drawScreen calls this before the panel is drawn. Paint a
+        // light shade over the world so the GUI stands out — a predictable,
+        // lighter replacement for vanilla's darker default dim.
+        Gui.drawRect(0, 0, width, height, DIM_COLOR);
     }
 
     @Override
