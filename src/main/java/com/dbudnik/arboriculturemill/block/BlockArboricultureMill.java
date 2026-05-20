@@ -21,6 +21,7 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidUtil;
 
 import javax.annotation.Nullable;
 
@@ -51,8 +52,19 @@ public class BlockArboricultureMill extends BlockContainer {
                                     EntityPlayer player, EnumHand hand, EnumFacing facing,
                                     float hitX, float hitY, float hitZ) {
         if (!world.isRemote) {
-            player.openGui(ArboricultureMill.INSTANCE, Reference.GUI_ID_MILL,
-                    world, pos.getX(), pos.getY(), pos.getZ());
+            // Right-clicking with a water bucket (or any water container) tops
+            // up the internal tank instead of opening the GUI. The tank only
+            // accepts water and cannot be drained, so an empty bucket does
+            // nothing and falls through to the GUI.
+            if (FluidUtil.interactWithFluidHandler(player, hand, world, pos, facing)) {
+                TileEntity te = world.getTileEntity(pos);
+                if (te != null) {
+                    te.markDirty();
+                }
+            } else {
+                player.openGui(ArboricultureMill.INSTANCE, Reference.GUI_ID_MILL,
+                        world, pos.getX(), pos.getY(), pos.getZ());
+            }
         }
         return true;
     }
