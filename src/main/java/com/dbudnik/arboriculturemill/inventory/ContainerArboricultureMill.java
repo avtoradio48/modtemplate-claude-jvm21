@@ -15,10 +15,11 @@ public class ContainerArboricultureMill extends Container {
     public static final int GUI_WIDTH = 176;
     public static final int GUI_HEIGHT = 184;
 
-    public static final int SAPLING_SLOT_X = 38;
+    // Slots sit to the right of the two vertical bars (energy + water).
+    public static final int SAPLING_SLOT_X = 54;
     public static final int SAPLING_SLOT_Y = 24;
 
-    public static final int FERTILIZER_SLOT_X = 38;
+    public static final int FERTILIZER_SLOT_X = 54;
     public static final int FERTILIZER_SLOT_Y = 54;
 
     public static final int OUTPUT_GRID_X = 116;
