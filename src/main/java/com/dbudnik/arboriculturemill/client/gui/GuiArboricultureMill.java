@@ -117,7 +117,7 @@ public class GuiArboricultureMill extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        String title = net.minecraft.client.resources.I18n.format("block.arboriculturemill.arboriculture_mill.name");
+        String title = net.minecraft.client.resources.I18n.format("tile.arboriculturemill.arboriculture_mill.name");
         fontRenderer.drawString(title, 8, 6, 0x404040);
         String invLabel = net.minecraft.client.resources.I18n.format("container.inventory");
         fontRenderer.drawString(invLabel, ContainerArboricultureMill.PLAYER_INV_X,

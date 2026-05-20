@@ -1,5 +1,5 @@
 itemGroup.arboriculturemill=Arboriculture Mill
-block.arboriculturemill.arboriculture_mill.name=Arboriculture Mill
+tile.arboriculturemill.arboriculture_mill.name=Arboriculture Mill
 
 tile.arboriculturemill.arboriculture_mill.tooltip.line1=Processes Forestry saplings into wood and fruits.
 tile.arboriculturemill.arboriculture_mill.tooltip.line2=Requires power, water, and fertilizer.
