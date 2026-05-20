@@ -1,13 +1,10 @@
 package com.dbudnik.arboriculturemill.client.gui;
 
-import com.dbudnik.arboriculturemill.Reference;
 import com.dbudnik.arboriculturemill.inventory.ContainerArboricultureMill;
 import com.dbudnik.arboriculturemill.tile.TileEntityArboricultureMill;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -15,15 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * IC2-style mill GUI. We do most of the drawing programmatically so that the
- * mod is shippable without a custom 176x184 background texture — drop one at
- * {@link #BACKGROUND} if you want a fancier look, otherwise the code below
- * paints a dark-grey panel that matches the IC2 machine palette.
+ * IC2-style mill GUI. The whole panel is painted programmatically with
+ * {@link Gui#drawRect} using the exact same coordinates as the container
+ * slots, so the slot frames always line up. (A custom background texture was
+ * dropped on purpose: a PNG that is not 256x256 is sampled by
+ * {@code drawTexturedModalRect} as if it were, which stretched the panel and
+ * made the layout look "shifted".)
  */
 public class GuiArboricultureMill extends GuiContainer {
-
-    private static final ResourceLocation BACKGROUND =
-            new ResourceLocation(Reference.MOD_ID, "textures/gui/arboriculture_mill.png");
 
     private static final int PANEL_COLOR        = 0xFFC6C6C6; // IC2 light grey
     private static final int PANEL_SHADOW       = 0xFF555555;
@@ -56,7 +52,6 @@ public class GuiArboricultureMill extends GuiContainer {
     private static final int ARROW_HEIGHT = 12;
 
     private final TileEntityArboricultureMill tile;
-    private boolean usingCustomTexture;
 
     public GuiArboricultureMill(InventoryPlayer playerInv, TileEntityArboricultureMill tile) {
         super(new ContainerArboricultureMill(playerInv, tile));
@@ -66,33 +61,11 @@ public class GuiArboricultureMill extends GuiContainer {
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
-        // Probe whether a real background texture exists; if so we'll bind it.
-        try {
-            mc.getResourceManager().getResource(BACKGROUND);
-            usingCustomTexture = true;
-        } catch (Exception missing) {
-            usingCustomTexture = false;
-        }
-    }
-
-    @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        if (usingCustomTexture) {
-            drawWithTexture();
-        } else {
-            drawProgrammatic();
-        }
+        drawProgrammatic();
         drawEnergyBar();
         drawWaterBar();
         drawProgressArrow();
-    }
-
-    private void drawWithTexture() {
-        GlStateManager.color(1F, 1F, 1F, 1F);
-        mc.getTextureManager().bindTexture(BACKGROUND);
-        drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
     }
 
     private void drawProgrammatic() {
